@@ -2,6 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/app/lib/db';
 import { cors } from '@/app/lib/cors';
 
+// Define TypeScript interfaces for your data models
+interface User {
+  id: number;
+  name: string;
+}
+
+interface Material {
+  id: number;
+  category: string;
+  title: string;
+  description: string;
+}
+
+interface Achievement {
+  user_id: number;
+  material_id: number;
+}
+
 const handler = async (req: NextRequest) => {
   const pathname = req.nextUrl.pathname.replace('/api/', '');
   const [route, ...params] = pathname.split('/');
@@ -37,7 +55,7 @@ const handler = async (req: NextRequest) => {
 async function handleCategories(req: NextRequest) {
   if (req.method !== 'GET') return methodNotAllowed();
   
-  const [results] = await pool.query("SELECT DISTINCT category FROM materials");
+  const [results] = await pool.query<Material[]>("SELECT DISTINCT category FROM materials");
   return NextResponse.json(results);
 }
 
@@ -45,7 +63,7 @@ async function handleMaterials(req: NextRequest, params: string[]) {
   if (req.method !== 'GET') return methodNotAllowed();
   
   const [category] = params;
-  const [results] = await pool.query(
+  const [results] = await pool.query<Material[]>(
     "SELECT * FROM materials WHERE category = ?",
     [category]
   );
@@ -56,14 +74,17 @@ async function handleLogin(req: NextRequest) {
   if (req.method !== 'POST') return methodNotAllowed();
   
   const { name } = await req.json();
-  const [results]: any = await pool.query(
+  const [results] = await pool.query<User[]>(
     "SELECT * FROM users WHERE name = ?",
     [name]
   );
 
   if (results.length > 0) {
     const user = results[0];
-    return NextResponse.json({ userId: user.id, message: "Login successful" });
+    return NextResponse.json({ 
+      userId: user.id, 
+      message: "Login successful" 
+    });
   }
   return NextResponse.json({ error: "User not found" }, { status: 404 });
 }
@@ -83,9 +104,9 @@ async function handleProgressCheck(req: NextRequest, params: string[]) {
   if (req.method !== 'GET') return methodNotAllowed();
   
   const [userId, materialId] = params;
-  const [results]: any = await pool.query(
+  const [results] = await pool.query<Achievement[]>(
     "SELECT * FROM achievements WHERE user_id = ? AND material_id = ?",
-    [userId, materialId]
+    [parseInt(userId), parseInt(materialId)]
   );
 
   return NextResponse.json({
