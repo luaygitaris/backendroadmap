@@ -1,21 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/app/lib/db';
 import { cors } from '@/app/lib/cors';
+import { RowDataPacket } from 'mysql2';
 
-// Define TypeScript interfaces for your data models
-interface User {
+interface User extends RowDataPacket {
   id: number;
   name: string;
 }
 
-interface Material {
+interface Material extends RowDataPacket {
   id: number;
   category: string;
   title: string;
   description: string;
 }
 
-interface Achievement {
+interface Achievement extends RowDataPacket {
   user_id: number;
   material_id: number;
 }
@@ -51,11 +51,12 @@ const handler = async (req: NextRequest) => {
   }
 };
 
-// Handler functions
 async function handleCategories(req: NextRequest) {
   if (req.method !== 'GET') return methodNotAllowed();
   
-  const [results] = await pool.query<Material[]>("SELECT DISTINCT category FROM materials");
+  const [results] = await pool.query<Material[]>(
+    "SELECT DISTINCT category FROM materials"
+  );
   return NextResponse.json(results);
 }
 
