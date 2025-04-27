@@ -25,3 +25,9 @@ export const GET = cors(async (req: NextRequest) => {
 
   return handler(req, category);
 });
+
+// Fixing the GET export for your `userId` and `materialId` route
+export const GET = async (req: NextRequest, { params }: { params: { userId: string; materialId: string } }) => {
+  const { userId, materialId } = params;
+  // Your logic here
+};
