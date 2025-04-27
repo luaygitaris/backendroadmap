@@ -3,7 +3,7 @@ import pool from '@/app/lib/db';
 import { cors } from '@/app/lib/cors';
 import { Achievement } from '@/app/lib/types';
 
-export const GET = cors(async (_req: NextRequest, { params }: { params: { userId: string, materialId: string } }) => {
+async function handler(_req: NextRequest, { params }: { params: { userId: string, materialId: string } }) {
   const { userId, materialId } = params;
 
   const [results] = await pool.query<Achievement[]>(
@@ -14,4 +14,8 @@ export const GET = cors(async (_req: NextRequest, { params }: { params: { userId
   return NextResponse.json({
     status: results.length > 0 ? "learned" : "not learned"
   });
-});
+}
+
+// This wrapper adapts (req, context) to (req) for cors
+export const GET = (req: NextRequest, context: { params: { userId: string, materialId: string } }) =>
+  cors(() => handler(req, context))(req);
