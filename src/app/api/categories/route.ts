@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import pool from '@/app/lib/db';
 import { cors } from '@/app/lib/cors';
 import { Material } from '@/app/lib/types';
 
-// Fungsi GET hanya memerlukan satu parameter (_req)
-export const GET = cors(async (_req: NextRequest) => {
+// No need for _req if it's not being used
+export const GET = cors(async () => {
   const [results] = await pool.query<Material[]>(
     "SELECT DISTINCT category FROM materials"
   );
