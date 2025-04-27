@@ -3,9 +3,8 @@ import pool from '@/app/lib/db';
 import { cors } from '@/app/lib/cors';
 import { Achievement } from '@/app/lib/types';
 
-async function handler(_req: NextRequest, { params }: { params: { userId: string, materialId: string } }) {
-  const { userId, materialId } = params;
-
+// Handler untuk mengambil data achievements berdasarkan userId dan materialId
+async function handler(req: NextRequest, { userId, materialId }: { userId: string; materialId: string }) {
   const [results] = await pool.query<Achievement[]>(
     "SELECT * FROM achievements WHERE user_id = ? AND material_id = ?",
     [parseInt(userId), parseInt(materialId)]
@@ -16,6 +15,11 @@ async function handler(_req: NextRequest, { params }: { params: { userId: string
   });
 }
 
-// This wrapper adapts (req, context) to (req) for cors
-export const GET = (req: NextRequest, context: { params: { userId: string, materialId: string } }) =>
-  cors(() => handler(req, context))(req);
+// Fungsi untuk mengeksekusi GET request dengan CORS
+export const GET = async (req: NextRequest, context: { params: { userId: string, materialId: string } }) => {
+  // Mengambil params dari context
+  const { userId, materialId } = context.params;
+
+  // Menggunakan CORS untuk membungkus handler
+  return cors(() => handler(req, { userId, materialId }))(req);
+};
