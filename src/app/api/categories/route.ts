@@ -4,7 +4,7 @@ import { cors } from '@/app/lib/cors';
 import { Material } from '@/app/lib/types';
 
 // Pisahkan handler untuk memudahkan penggunaan
-async function handler(_req: NextRequest, { category }: { category: string }) {
+async function handler(_req: NextRequest, category: string) {
   const [results] = await pool.query<Material[]>(
     "SELECT DISTINCT category FROM materials WHERE category = ?",
     [category]
@@ -16,12 +16,12 @@ async function handler(_req: NextRequest, { category }: { category: string }) {
 // Bungkus handler dengan cors yang hanya menerima satu parameter
 export const GET = cors(async (req: NextRequest) => {
   // Mendapatkan category dari URL
-  const category = req.url.split('/').pop(); // Misalnya: /api/materials/[category]
+  const urlParts = req.url.split('/');
+  const category = urlParts[urlParts.length - 1]; // Mengambil category dari URL
 
-  // Pastikan category tersedia
   if (!category) {
     return NextResponse.json({ error: 'Category not found' }, { status: 400 });
   }
 
-  return handler(req, { category });
+  return handler(req, category);
 });
