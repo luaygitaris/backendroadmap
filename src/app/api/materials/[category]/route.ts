@@ -6,7 +6,7 @@ import { Material } from '@/app/lib/types';
 // Pisahkan handler untuk memudahkan penggunaan
 async function handler(_req: NextRequest, category: string) {
   const [results] = await pool.query<Material[]>(
-    "SELECT DISTINCT category FROM materials WHERE category = ?",
+    "SELECT * FROM materials WHERE category = ?",
     [category]
   );
 
